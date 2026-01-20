@@ -1,49 +1,50 @@
-# Anatomy of an SQL Index
-# SQL 索引的剖析
+# SQL 索引的剖析（Anatomy of an SQL Index）
 
 “An index makes the query fast” is the most basic explanation of an index I have ever seen. Although it describes the most important aspect of an index very well, it is—unfortunately—not sufficient for this book. This chapter describes the index structure in a less superficial way but doesn’t dive too deeply into details. It provides just enough insight for one to understand the SQL performance aspects discussed throughout the book.
-「索引让查询变快」是我见过对索引最基本的解释。虽然它很好地描述了索引最重要的方面，但不幸的是，对于本书来说这还**不够**。本章将以一种不那么流于表面的方式描述索引结构，但也不会陷入太深的细节。它提供的见解足以让人理解本书中讨论的 SQL 性能问题。
+
+「索引让查询变快」是我见过对索引的解释当中最简单的一个。虽然这个解释很好地描述了索引最重要的点，但不幸的是，这一解释对于本书来说这还不够。本章将以一种不那么流于表面的方式去描述索引结构，但也不会深究太多的细节，但提供的见解足以让人理解本书中讨论的 SQL 性能问题。
 
 An index is a distinct structure in the database that is built using the create index statement. It requires its own disk space and holds a copy of the indexed table data. That means that an index is pure redundancy. Creating an index does not change the table data; it just creates a new data structure that refers to the table. A database index is, after all, very much like the index at the end of a book: it occupies its own space, it is highly redundant, and it refers to the actual information stored in a different place.
-索引是数据库中一个独特的结构，使用 `create index` 语句构建。它需要占用自己的磁盘空间，并包含被索引表数据的副本。这意味着索引是**纯粹的冗余**。创建索引不会改变表数据；它只是创建了一个指向该表的新数据结构。归根结底，数据库索引非常像书末的索引：它占用自己的空间，它是高度冗余的，并且它指向存储在别处的实际信息。
+
+索引是数据库中一个独特的结构，是使用 `create index` 语句去创建的。索引需要占用额外的磁盘空间，并持有被索引表数据的副本。这意味着索引是纯粹冗余（pure redundancy）。创建索引不会改变表数据；它只是创建了一个指向该表的新数据结构。归根结底，数据库索引非常像书末尾的索引（译：有的书末尾会有额外的索引页）：它占有自己的空间，是高度冗余的，并且指向存储在别处的实际信息。
 
 ---
-**Clustered Indexes (SQL Server, MySQL/InnoDB)**
-**聚簇索引 (SQL Server, MySQL/InnoDB)**
+**聚簇索引 (SQL Server, MySQL/InnoDB)**（**Clustered Indexes (SQL Server, MySQL/InnoDB)**
 
 SQL Server and MySQL (using InnoDB) take a broader view of what “index” means. They refer to tables that consist of the index structure only as clustered indexes. These tables are called Index-Organized Tables (IOT) in the Oracle database.
+
 SQL Server 和 MySQL（使用 InnoDB）对「索引」的定义有更广泛的看法。它们将只由索引结构组成的表称为**聚簇索引**（Clustered Indexes）。这些表在 Oracle 数据库中被称为**索引组织表**（Index-Organized Tables, IOT）。
 
 Chapter 5, “Clustering Data: The Second Power of Indexing”, describes them in more detail and explains their advantages and disadvantages.
-第五章「[聚簇数据：索引的第二种力量](todo)」将更详细地描述它们，并解释它们的优缺点。
+
+第五章「[聚簇数据：索引的第二种力量](https://use-the-index-luke.com/sql/clustering)」将更详细地描述它们，并解释它们的优缺点。
+
 ---
 
 Searching in a database index is like searching in a printed telephone directory. The key concept is that all entries are arranged in a well-defined order. Finding data in an ordered data set is fast and easy because the sort order determines each entry’s position.
-在数据库索引中搜索就像在印刷的电话簿中搜索一样。关键概念是所有条目都按照明确定义的顺序排列。在有序数据集中查找数据既快又容易，因为排序顺序决定了每个条目的位置。
 
-If you like this page, you might also like …
-… to subscribe my mailing lists, get free stickers, buy my book or join a training.
-如果您喜欢这个页面，您可能也会喜欢……
-……订阅我的邮件列表，获取免费贴纸，购买我的书或参加培训。
+在数据库索引中搜索就像在纸质的电话簿中搜索一样。关键点是所有条目都按照着一个明确定义的顺序排列的。在有序数据集中去查找数据既快又简单，因为排序顺序确定好了每个条目的位置。
 
 A database index is, however, more complex than a printed directory because it undergoes constant change. Updating a printed directory for every change is impossible for the simple reason that there is no space between existing entries to add new ones. A printed directory bypasses this problem by only handling the accumulated updates with the next printing. An SQL database cannot wait that long. It must process insert, delete and update statements immediately, keeping the index order without moving large amounts of data.
-然而，数据库索引比印刷目录更复杂，因为它经历着不断的**变化**。对于每一个变更都去更新印刷目录是不可能的，原因很简单：现有条目之间没有空间来添加新条目。印刷目录通过仅在下次印刷时处理累积的更新来绕过这个问题。SQL 数据库不能等那么久。它必须立即处理 insert、delete 和 update 语句，在不移动大量数据的情况下保持索引顺序。
+
+然而，数据库索引比纸质电话簿更复杂，因为数据库索引会不断地变化。对于每次信息变更都去更新电话簿是不可能的，原因很简单：现有条目之间没有空间插入一条新条目。纸质电话簿只能通过在下次印刷时集中处理这些条目的变更来绕过这个问题。但 SQL 数据库不能等那么久，数据库必须立即处理 insert、delete 和 update 语句，要在不移动大量数据的情况下保持索引顺序。
 
 The database combines two data structures to meet the challenge: a doubly linked list and a search tree. These two structures explain most of the database’s performance characteristics.
-数据库结合了两种数据结构来应对这一挑战：**双向链表**和**搜索树**。这两种结构解释了数据库的大部分性能特征。
+
+数据库结合了两种数据结构来应对这一挑战：双向链表和搜索树。这两种结构决定了数据库的大部分的性能特征。
 
 **Contents**
 **目录**
 ---
 1. The Leaf Nodes — A doubly linked list
-1. 叶子节点——双向链表
 2. The B-Tree — It’s a balanced tree
-2. B-树——它是平衡树
 3. Slow Indexes, Part I — Two ingredients make the index slow
-3. 慢索引，第一部分——导致索引缓慢的两个因素
 
-## The Index Leaf Nodes
-## 索引叶子节点
+1. 叶节点 —— 双向链表
+2. B-树 —— 一个平衡树 
+3. 慢索引，第一部分 —— 导致索引缓慢的两个因素
+
+## The Index Leaf Nodes（索引叶子节点） // TODO
 
 The primary purpose of an index is to provide an ordered representation of the indexed data. It is, however, not possible to store the data sequentially because an insert statement would need to move the following entries to make room for the new one. Moving large amounts of data is very time-consuming so the insert statement would be very slow. The solution to the problem is to establish a logical order that is independent of physical order in memory.
 索引的主要目的是提供被索引数据的**有序**表示。然而，按顺序存储数据是不可能的，因为 insert 语句需要移动随后的条目以为新条目腾出空间。移动大量数据非常耗时，因此 insert 语句会非常慢。这个问题的解决方案是建立一个独立于内存中物理顺序的**逻辑顺序**。
