@@ -1,0 +1,11 @@
+# Use The Index, Luke! (English)
+
+- [Preface](1-preface/index.md) (1 pages)
+- [Anatomy of an Index](2-anatomy/index.md) (4 pages)
+- [The Where Clause](3-where-clause/index.md) (25 pages)
+- [Testing and Scalability](4-testing-scalability/index.md) (4 pages)
+- [The Join Operation](5-join/index.md) (4 pages)
+- [Clustering Data](6-clustering/index.md) (4 pages)
+- [Sorting and Grouping](7-sorting-grouping/index.md) (4 pages)
+- [Partial Results](8-partial-results/index.md) (4 pages)
+- [Insert, Delete and Update](9-dml/index.md) (4 pages)
